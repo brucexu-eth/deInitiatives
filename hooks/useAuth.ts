@@ -23,7 +23,10 @@ export function useAuth() {
 
     try {
       // Get nonce
-      const nonceResponse = await fetch('/api/auth/nonce');
+      const nonceResponse = await fetch(`/api/auth/nonce?address=${address}`);
+      if (!nonceResponse.ok) {
+        throw new Error('Failed to get nonce');
+      }
       const { nonce } = await nonceResponse.json();
 
       // Create message to sign
