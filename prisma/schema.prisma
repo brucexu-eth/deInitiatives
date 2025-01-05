@@ -23,17 +23,19 @@ model Initiative {
 
 model Item {
   id           String     @id @default(cuid())
-  initiative   Initiative @relation(fields: [initiativeId], references: [id])
-  initiativeId String
   title        String
-  description  String
-  status       String     @default("active") // active, completed, cancelled
+  description  String?
+  status       String     @default("active")
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
-  createdBy    String // wallet address of creator
+  createdBy    String
+  initiativeId String
+  initiative   Initiative @relation(fields: [initiativeId], references: [id], onDelete: Cascade)
   votes        Vote[]
   upVotes      Int        @default(0)
   downVotes    Int        @default(0)
+
+  @@index([initiativeId])
 }
 
 model Vote {

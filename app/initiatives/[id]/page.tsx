@@ -1,15 +1,18 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import { formatDistanceToNow } from 'date-fns';
 import { CreateItemDialog } from '@/components/create-item-dialog';
+import { EditInitiativeDialog } from '@/components/edit-initiative-dialog';
+import { EditItemStatusDialog } from '@/components/edit-item-status-dialog';
 import { useToast } from '@/components/ui/use-toast';
 import { ArrowLeft, ChevronUp, ChevronDown } from 'lucide-react';
 import { useAccount } from 'wagmi';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { canEditInitiative, canEditItemStatus } from '@/lib/permissions';
 
 interface Vote {
   id: string;
@@ -30,6 +33,7 @@ interface Item {
       down: number;
     };
   };
+  status: string;
 }
 
 interface Initiative {
@@ -41,15 +45,18 @@ interface Initiative {
   items: Item[];
 }
 
-export default function InitiativeDetailPage() {
-  const params = useParams();
-  const { toast } = useToast();
+export default function InitiativeDetailPage({
+  params,
+}: {
+  params: { id: string };
+}) {
   const { address } = useAccount();
+  const { toast } = useToast();
   const [initiative, setInitiative] = useState<Initiative | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [votingItemId, setVotingItemId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const fetchInitiative = async () => {
+  const fetchInitiative = useCallback(async () => {
     try {
       const response = await fetch(`/api/initiatives/${params.id}`);
       if (!response.ok) {
@@ -58,16 +65,16 @@ export default function InitiativeDetailPage() {
       const data = await response.json();
       setInitiative(data);
     } catch (error) {
-      console.error('Error fetching initiative:', error);
+      console.error('Error:', error);
       toast({
         title: 'Error',
-        description: 'Failed to load initiative',
+        description: 'Failed to fetch initiative',
         variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [params.id, toast]);
 
   const handleVote = async (itemId: string, type: 'up' | 'down') => {
     if (!address) {
@@ -152,9 +159,19 @@ export default function InitiativeDetailPage() {
 
       <div className="space-y-8">
         <div className="text-center space-y-4">
-          <h1 className="text-3xl font-bold">
-            <ReactMarkdown className="prose dark:prose-invert max-w-none inline">{initiative.title}</ReactMarkdown>
-          </h1>
+          <div className="flex items-center justify-center gap-2">
+            <h1 className="text-3xl font-bold">
+              <ReactMarkdown className="prose dark:prose-invert max-w-none inline">
+                {initiative.title}
+              </ReactMarkdown>
+            </h1>
+            {address && canEditInitiative(address, initiative.createdBy) && (
+              <EditInitiativeDialog
+                initiative={initiative}
+                onInitiativeUpdated={fetchInitiative}
+              />
+            )}
+          </div>
           <div className="text-sm text-muted-foreground">
             Created by {initiative.createdBy.slice(0, 6)}...{initiative.createdBy.slice(-4)}{' '}
             {formatDistanceToNow(new Date(initiative.createdAt))} ago
@@ -231,14 +248,33 @@ export default function InitiativeDetailPage() {
                       </span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="prose dark:prose-invert max-w-none">
-                        <ReactMarkdown>{item.title}</ReactMarkdown>
-                      </div>
-                      {item.description && (
-                        <div className="mt-1 prose dark:prose-invert prose-sm max-w-none">
-                          <ReactMarkdown>{item.description}</ReactMarkdown>
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="prose dark:prose-invert max-w-none">
+                            <ReactMarkdown>{item.title}</ReactMarkdown>
+                          </div>
+                          {item.description && (
+                            <div className="mt-1 prose dark:prose-invert prose-sm max-w-none">
+                              <ReactMarkdown>{item.description}</ReactMarkdown>
+                            </div>
+                          )}
+                          <div className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
+                            <span>Status: {item.status}</span>
+                            <span>•</span>
+                            <span>
+                              by {item.createdBy.slice(0, 6)}...{item.createdBy.slice(-4)}{' '}
+                              {formatDistanceToNow(new Date(item.createdAt))} ago
+                            </span>
+                          </div>
                         </div>
-                      )}
+                        {address && canEditItemStatus(address) && (
+                          <EditItemStatusDialog
+                            initiativeId={params.id}
+                            item={item}
+                            onItemUpdated={fetchInitiative}
+                          />
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
