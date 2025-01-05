@@ -1,22 +1,29 @@
 'use client';
 
 import { getDefaultWallets, RainbowKitProvider } from '@rainbow-me/rainbowkit';
-import { WagmiProvider } from 'wagmi';
+import { configureChains, createConfig, WagmiConfig } from 'wagmi';
 import { mainnet } from 'wagmi/chains';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { createConfig } from 'wagmi';
+import { publicProvider } from 'wagmi/providers/public';
 
-const { chains, publicClient } = createConfig({
-  chains: [mainnet],
-});
+const projectId = process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID;
+if (!projectId) {
+  throw new Error('Missing NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID');
+}
+
+const { chains, publicClient } = configureChains(
+  [mainnet],
+  [publicProvider()]
+);
 
 const { connectors } = getDefaultWallets({
   appName: 'DAO Voting App',
-  projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || '',
+  projectId,
   chains,
 });
 
 const config = createConfig({
+  autoConnect: true,
   connectors,
   publicClient,
 });
@@ -25,12 +32,12 @@ const queryClient = new QueryClient();
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <WagmiProvider config={config}>
+    <WagmiConfig config={config}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider chains={chains}>
           {children}
         </RainbowKitProvider>
       </QueryClientProvider>
-    </WagmiProvider>
+    </WagmiConfig>
   );
 }
