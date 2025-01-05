@@ -11,6 +11,31 @@ const initiativeSchema = z.object({
   createdBy: z.string().min(1, 'Creator address is required'),
 });
 
+export async function GET() {
+  try {
+    const initiatives = await prisma.initiative.findMany({
+      orderBy: {
+        createdAt: 'desc',
+      },
+      include: {
+        _count: {
+          select: {
+            items: true,
+          },
+        },
+      },
+    });
+
+    return NextResponse.json(initiatives);
+  } catch (error) {
+    console.error('Error fetching initiatives:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch initiatives' },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const json = await request.json();

@@ -1,54 +1,63 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Initiative } from '@/lib/types';
-import { supabase } from '@/lib/supabase';
 import { PlusCircle } from 'lucide-react';
 import { useAccount } from 'wagmi';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import { CreateInitiativeDialog } from './create-initiative-dialog';
+import { useToast } from '@/components/ui/use-toast';
+import { formatDistanceToNow } from 'date-fns';
+
+interface Initiative {
+  id: string;
+  title: string;
+  description: string;
+  createdBy: string;
+  createdAt: string;
+  status: string;
+  _count: {
+    items: number;
+  };
+}
 
 export function InitiativeList() {
   const [initiatives, setInitiatives] = useState<Initiative[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const { address } = useAccount();
+  const { toast } = useToast();
 
   const fetchInitiatives = async () => {
     try {
-      const { data, error } = await supabase
-        .from('initiatives')
-        .select('*')
-        .eq('is_archived', false)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching initiatives:', error);
-        return;
+      const response = await fetch('/api/initiatives');
+      if (!response.ok) {
+        throw new Error('Failed to fetch initiatives');
       }
-
+      const data = await response.json();
       setInitiatives(data);
     } catch (error) {
       console.error('Error fetching initiatives:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load initiatives',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
     fetchInitiatives();
-
-    // Subscribe to real-time changes
-    const subscription = supabase
-      .channel('initiatives')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'initiatives' }, 
-        () => {
-          fetchInitiatives();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      subscription.unsubscribe();
-    };
   }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <div className="text-center">Loading initiatives...</div>
+      </div>
+    );
+  }
 
   if (initiatives.length === 0) {
     return (
@@ -68,30 +77,29 @@ export function InitiativeList() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-3xl font-bold">Initiatives</h2>
-        {address && (
-          <CreateInitiativeDialog onInitiativeCreated={fetchInitiatives} />
-        )}
+        <h2 className="text-2xl font-bold">Initiatives</h2>
+        <CreateInitiativeDialog onInitiativeCreated={fetchInitiatives} />
       </div>
-
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="divide-y divide-gray-200 rounded-lg border">
         {initiatives.map((initiative) => (
           <Link
             key={initiative.id}
             href={`/initiatives/${initiative.id}`}
-            className="block"
+            className="block hover:bg-muted/50 transition-colors"
           >
-            <div className="p-6 rounded-lg border bg-card hover:border-primary transition-colors">
-              <h3 className="text-xl font-semibold mb-2">
-                <ReactMarkdown>{initiative.title}</ReactMarkdown>
-              </h3>
-              {initiative.description && (
-                <div className="text-sm text-muted-foreground mb-4">
-                  <ReactMarkdown>{initiative.description}</ReactMarkdown>
-                </div>
-              )}
+            <div className="p-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-medium">{initiative.title}</h3>
+                <span className="text-sm text-muted-foreground">
+                  {initiative._count.items} items
+                </span>
+              </div>
+              <div className="mt-1 text-sm text-muted-foreground flex items-center justify-between">
+                <div>{initiative.createdBy.slice(0, 6)}...{initiative.createdBy.slice(-4)}</div>
+                <div>{formatDistanceToNow(new Date(initiative.createdAt))} ago</div>
+              </div>
             </div>
           </Link>
         ))}
