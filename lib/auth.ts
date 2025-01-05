@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from './jwt';
+import { prisma } from './prisma';
+import { canEditItemStatus } from './permissions';
 
 type AuthHandler = (
   req: NextRequest,
@@ -53,6 +55,43 @@ export async function withInitiativeOwnerAuth(
 
     // 检查是否是initiative的创建者
     if (initiative.createdBy.toLowerCase() !== address.toLowerCase()) {
+      return NextResponse.json(
+        { error: 'Admin access required' },
+        { status: 403 }
+      );
+    }
+
+    return handler(req, address);
+  });
+}
+
+// Item状态编辑认证中间件
+export async function withItemStatusAuth(
+  req: NextRequest,
+  initiativeId: string,
+  itemId: string,
+  handler: AuthHandler
+): Promise<NextResponse> {
+  return withAuth(req, async (req, address) => {
+    // 查找initiative和item
+    const [initiative, item] = await Promise.all([
+      prisma.initiative.findUnique({
+        where: { id: initiativeId },
+      }),
+      prisma.item.findUnique({
+        where: { id: itemId },
+      }),
+    ]);
+
+    if (!initiative || !item) {
+      return NextResponse.json(
+        { error: 'Initiative or item not found' },
+        { status: 404 }
+      );
+    }
+
+    // 检查权限
+    if (!canEditItemStatus(address, initiative.createdBy, item.createdBy)) {
       return NextResponse.json(
         { error: 'Admin access required' },
         { status: 403 }

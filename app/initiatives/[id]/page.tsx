@@ -283,7 +283,10 @@ export default function InitiativeDetailPage({
                               Created {formatDistanceToNow(new Date(item.createdAt))} ago
                             </div>
                           </div>
-                          {address === initiative.createdBy && (
+                          {address && (
+                            address === initiative.createdBy ||
+                            address === item.createdBy
+                          ) && (
                             <EditItemStatusDialog
                               initiativeId={initiative.id}
                               item={item}
