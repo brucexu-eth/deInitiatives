@@ -35,6 +35,7 @@ interface Item {
       down: number;
     };
   };
+  score: number;
   status: string;
 }
 
@@ -215,6 +216,9 @@ export default function InitiativeDetailPage({
                         isDisabled={votingItemId === item.id}
                         onClick={() => handleVote(item.id, 'up')}
                       />
+                      <div className="text-sm font-medium tabular-nums">
+                        {item.score}
+                      </div>
                       <VoteButton
                         type="down"
                         count={item._count.votes.down}

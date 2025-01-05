@@ -20,16 +20,8 @@ export async function GET(
       where: { id: params.id },
       include: {
         items: {
-          orderBy: {
-            createdAt: 'desc',
-          },
           include: {
             votes: true,
-            _count: {
-              select: {
-                votes: true,
-              },
-            },
           },
         },
       },
@@ -42,18 +34,34 @@ export async function GET(
       );
     }
 
-    // Transform the data to include up and down vote counts
+    // Transform the data to include up and down vote counts and calculate score
     const transformedInitiative = {
       ...initiative,
-      items: initiative.items.map((item) => ({
-        ...item,
-        _count: {
-          votes: {
-            up: item.votes.filter((v) => v.voteType === 'up').length,
-            down: item.votes.filter((v) => v.voteType === 'down').length,
-          },
-        },
-      })),
+      items: initiative.items
+        .map((item) => {
+          const upVotes = item.votes.filter((v) => v.voteType === 'up').length;
+          const downVotes = item.votes.filter((v) => v.voteType === 'down').length;
+          const score = upVotes - downVotes;
+          
+          return {
+            ...item,
+            _count: {
+              votes: {
+                up: upVotes,
+                down: downVotes,
+              },
+            },
+            score,
+          };
+        })
+        .sort((a, b) => {
+          // First sort by score (descending)
+          if (b.score !== a.score) {
+            return b.score - a.score;
+          }
+          // If scores are equal, sort by creation date (newest first)
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        }),
     };
 
     return NextResponse.json(transformedInitiative);
