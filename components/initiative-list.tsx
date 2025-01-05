@@ -53,23 +53,25 @@ export function InitiativeList() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-16">
-        <div className="text-center">Loading initiatives...</div>
+      <div className="container max-w-4xl mx-auto">
+        <div className="text-center py-16">Loading initiatives...</div>
       </div>
     );
   }
 
   if (initiatives.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <div className="rounded-lg border-2 border-dashed border-gray-300 p-12 max-w-lg">
-          <PlusCircle className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-4 text-lg font-semibold text-gray-900">No initiatives yet</h3>
-          <p className="mt-2 text-sm text-gray-500">
-            Get started by creating a new initiative for your community.
-          </p>
-          <div className="mt-6">
-            <CreateInitiativeDialog onInitiativeCreated={fetchInitiatives} />
+      <div className="container max-w-4xl mx-auto">
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <div className="rounded-lg border-2 border-dashed border-gray-300 p-12 max-w-lg">
+            <PlusCircle className="mx-auto h-12 w-12 text-gray-400" />
+            <h3 className="mt-4 text-lg font-semibold text-gray-900">No initiatives yet</h3>
+            <p className="mt-2 text-sm text-gray-500">
+              Get started by creating a new initiative for your community.
+            </p>
+            <div className="mt-6">
+              <CreateInitiativeDialog onInitiativeCreated={fetchInitiatives} />
+            </div>
           </div>
         </div>
       </div>
@@ -77,32 +79,34 @@ export function InitiativeList() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Initiatives</h2>
-        <CreateInitiativeDialog onInitiativeCreated={fetchInitiatives} />
-      </div>
-      <div className="divide-y divide-gray-200 rounded-lg border">
-        {initiatives.map((initiative) => (
-          <Link
-            key={initiative.id}
-            href={`/initiatives/${initiative.id}`}
-            className="block hover:bg-muted/50 transition-colors"
-          >
-            <div className="p-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-medium">{initiative.title}</h3>
-                <span className="text-sm text-muted-foreground">
-                  {initiative._count.items} items
-                </span>
+    <div className="container max-w-4xl mx-auto">
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-bold">Initiatives</h2>
+          <CreateInitiativeDialog onInitiativeCreated={fetchInitiatives} />
+        </div>
+        <div className="divide-y divide-gray-200 rounded-lg border bg-card">
+          {initiatives.map((initiative) => (
+            <Link
+              key={initiative.id}
+              href={`/initiatives/${initiative.id}`}
+              className="block hover:bg-muted/50 transition-colors"
+            >
+              <div className="p-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-medium">{initiative.title}</h3>
+                  <span className="text-sm text-muted-foreground">
+                    {initiative._count.items} items
+                  </span>
+                </div>
+                <div className="mt-1 text-sm text-muted-foreground flex items-center justify-between">
+                  <div>{initiative.createdBy.slice(0, 6)}...{initiative.createdBy.slice(-4)}</div>
+                  <div>{formatDistanceToNow(new Date(initiative.createdAt))} ago</div>
+                </div>
               </div>
-              <div className="mt-1 text-sm text-muted-foreground flex items-center justify-between">
-                <div>{initiative.createdBy.slice(0, 6)}...{initiative.createdBy.slice(-4)}</div>
-                <div>{formatDistanceToNow(new Date(initiative.createdAt))} ago</div>
-              </div>
-            </div>
-          </Link>
-        ))}
+            </Link>
+          ))}
+        </div>
       </div>
     </div>
   );
