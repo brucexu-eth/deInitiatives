@@ -8,11 +8,12 @@ import { CreateItemDialog } from '@/components/create-item-dialog';
 import { EditInitiativeDialog } from '@/components/edit-initiative-dialog';
 import { EditItemStatusDialog } from '@/components/edit-item-status-dialog';
 import { useToast } from '@/components/ui/use-toast';
-import { ArrowLeft, ChevronUp, ChevronDown } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useAccount } from 'wagmi';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { canEditInitiative, canEditItemStatus } from '@/lib/permissions';
+import { VoteButton } from '@/components/vote-button';
 
 interface Vote {
   id: string;
@@ -78,12 +79,7 @@ export default function InitiativeDetailPage({
 
   const handleVote = async (itemId: string, type: 'up' | 'down') => {
     if (!address) {
-      toast({
-        title: 'Error',
-        description: 'Please connect your wallet first',
-        variant: 'destructive',
-      });
-      return;
+      return; // RequireWallet component will handle this case
     }
 
     setVotingItemId(itemId);
@@ -110,7 +106,6 @@ export default function InitiativeDetailPage({
 
       await fetchInitiative();
       
-      // Show success toast
       toast({
         title: 'Success',
         description: 'Vote recorded successfully',
@@ -206,46 +201,24 @@ export default function InitiativeDetailPage({
                     className="flex gap-4 items-start p-4 rounded-lg border bg-card"
                   >
                     <div className="flex flex-col items-center gap-2">
-                      <button
+                      <VoteButton
+                        type="up"
+                        count={item._count.votes.up}
+                        isVoted={item.votes.some(
+                          (v) => v.voter === address && v.voteType === 'up'
+                        )}
+                        isDisabled={votingItemId === item.id}
                         onClick={() => handleVote(item.id, 'up')}
-                        disabled={votingItemId === item.id}
-                        className={cn(
-                          'p-1 rounded hover:bg-muted transition-colors',
-                          item.votes.some(
-                            (v) => v.voter === address && v.voteType === 'up'
-                          ) && 'text-green-600'
+                      />
+                      <VoteButton
+                        type="down"
+                        count={item._count.votes.down}
+                        isVoted={item.votes.some(
+                          (v) => v.voter === address && v.voteType === 'down'
                         )}
-                      >
-                        <ChevronUp className="h-6 w-6" />
-                      </button>
-                      <span
-                        className={cn(
-                          'text-sm tabular-nums',
-                          votingItemId === item.id && 'opacity-50'
-                        )}
-                      >
-                        {item._count.votes.up}
-                      </span>
-                      <button
+                        isDisabled={votingItemId === item.id}
                         onClick={() => handleVote(item.id, 'down')}
-                        disabled={votingItemId === item.id}
-                        className={cn(
-                          'p-1 rounded hover:bg-muted transition-colors',
-                          item.votes.some(
-                            (v) => v.voter === address && v.voteType === 'down'
-                          ) && 'text-red-600'
-                        )}
-                      >
-                        <ChevronDown className="h-6 w-6" />
-                      </button>
-                      <span
-                        className={cn(
-                          'text-sm tabular-nums',
-                          votingItemId === item.id && 'opacity-50'
-                        )}
-                      >
-                        {item._count.votes.down}
-                      </span>
+                      />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-4">

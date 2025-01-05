@@ -23,18 +23,7 @@ export function useAuth() {
 
     try {
       // Get nonce
-      const nonceResponse = await fetch('/api/auth/nonce', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ address }),
-      });
-      
-      if (!nonceResponse.ok) {
-        throw new Error('Failed to get nonce');
-      }
-      
+      const nonceResponse = await fetch('/api/auth/nonce');
       const { nonce } = await nonceResponse.json();
 
       // Create message to sign
@@ -57,8 +46,7 @@ export function useAuth() {
       });
 
       if (!verifyResponse.ok) {
-        const error = await verifyResponse.json();
-        throw new Error(error.error || 'Failed to verify signature');
+        throw new Error('Failed to verify signature');
       }
 
       const { token: newToken } = await verifyResponse.json();
