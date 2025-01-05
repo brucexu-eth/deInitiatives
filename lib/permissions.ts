@@ -1,17 +1,9 @@
-// 管理员地址列表
-const ADMIN_ADDRESSES = [
-  // 添加管理员的钱包地址
-  '0x123...', // 替换为实际的管理员地址
-];
-
-export function isAdmin(address: string): boolean {
-  return ADMIN_ADDRESSES.includes(address.toLowerCase());
-}
-
+// 检查用户是否有权限编辑initiative
 export function canEditInitiative(userAddress: string, creatorAddress: string): boolean {
-  return userAddress.toLowerCase() === creatorAddress.toLowerCase() || isAdmin(userAddress);
+  return userAddress.toLowerCase() === creatorAddress.toLowerCase();
 }
 
-export function canEditItemStatus(userAddress: string): boolean {
-  return isAdmin(userAddress);
+// 检查用户是否有权限编辑item状态
+export function canEditItemStatus(userAddress: string, creatorAddress: string): boolean {
+  return userAddress.toLowerCase() === creatorAddress.toLowerCase();
 }

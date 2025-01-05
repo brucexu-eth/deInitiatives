@@ -23,22 +23,24 @@ export function VoteButton({
   const colorClass = type === 'up' ? 'text-green-600' : 'text-red-600';
 
   return (
-    <div className="flex flex-col items-center gap-1">
+    <div className="flex items-center gap-1">
       <RequireWallet>
         <button
           onClick={onClick}
           disabled={isDisabled}
           className={cn(
             'p-1 rounded hover:bg-muted transition-colors',
-            isVoted && colorClass
+            isVoted && colorClass,
+            isDisabled && 'opacity-50 cursor-not-allowed'
           )}
         >
-          <Icon className="h-6 w-6" />
+          <Icon className="h-4 w-4" />
         </button>
       </RequireWallet>
       <span
         className={cn(
-          'text-sm tabular-nums',
+          'text-sm tabular-nums min-w-[2ch] text-center',
+          isVoted && colorClass,
           isDisabled && 'opacity-50'
         )}
       >

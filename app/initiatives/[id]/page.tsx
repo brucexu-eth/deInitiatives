@@ -36,7 +36,7 @@ interface Item {
     };
   };
   score: number;
-  status: string;
+  status: 'active' | 'completed' | 'cancelled';
 }
 
 interface Initiative {
@@ -46,6 +46,18 @@ interface Initiative {
   createdBy: string;
   createdAt: string;
   items: Item[];
+}
+
+// Status display helper
+function getStatusDisplay(status: Item['status']): { label: string; color: string } {
+  switch (status) {
+    case 'active':
+      return { label: 'In Progress', color: 'blue' };
+    case 'completed':
+      return { label: 'Completed', color: 'green' };
+    case 'cancelled':
+      return { label: 'Cancelled', color: 'red' };
+  }
 }
 
 export default function InitiativeDetailPage({
@@ -204,57 +216,85 @@ export default function InitiativeDetailPage({
                 {initiative.items.map((item) => (
                   <div
                     key={item.id}
-                    className="flex gap-4 items-start p-4 rounded-lg border bg-card"
+                    className={cn(
+                      'p-4 rounded-lg border',
+                      item.status === 'completed' && 'bg-muted/50',
+                      item.status === 'cancelled' && 'bg-destructive/10'
+                    )}
                   >
-                    <div className="flex flex-col items-center gap-2">
-                      <VoteButton
-                        type="up"
-                        count={item._count.votes.up}
-                        isVoted={item.votes.some(
-                          (v) => v.voter === address && v.voteType === 'up'
-                        )}
-                        isDisabled={votingItemId === item.id}
-                        onClick={() => handleVote(item.id, 'up')}
-                      />
-                      <div className="text-sm font-medium tabular-nums">
-                        {item.score}
-                      </div>
-                      <VoteButton
-                        type="down"
-                        count={item._count.votes.down}
-                        isVoted={item.votes.some(
-                          (v) => v.voter === address && v.voteType === 'down'
-                        )}
-                        isDisabled={votingItemId === item.id}
-                        onClick={() => handleVote(item.id, 'down')}
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <div className="prose dark:prose-invert max-w-none">
-                            <ReactMarkdown>{item.title}</ReactMarkdown>
-                          </div>
-                          {item.description && (
-                            <div className="mt-1 prose dark:prose-invert prose-sm max-w-none">
-                              <ReactMarkdown>{item.description}</ReactMarkdown>
-                            </div>
+                    <div className="flex gap-4">
+                      {/* Vote buttons */}
+                      <div className="flex items-center gap-2">
+                        <VoteButton
+                          type="up"
+                          count={item._count.votes.up}
+                          isVoted={item.votes.some(
+                            (v) => v.voter === address && v.voteType === 'up'
                           )}
-                          <div className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
-                            <span>Status: {item.status}</span>
-                            <span>•</span>
-                            <span>
-                              by {item.createdBy.slice(0, 6)}...{item.createdBy.slice(-4)}{' '}
-                              {formatDistanceToNow(new Date(item.createdAt))} ago
-                            </span>
+                          isDisabled={
+                            votingItemId === item.id ||
+                            item.status !== 'active'
+                          }
+                          onClick={() => handleVote(item.id, 'up')}
+                        />
+                        <VoteButton
+                          type="down"
+                          count={item._count.votes.down}
+                          isVoted={item.votes.some(
+                            (v) => v.voter === address && v.voteType === 'down'
+                          )}
+                          isDisabled={
+                            votingItemId === item.id ||
+                            item.status !== 'active'
+                          }
+                          onClick={() => handleVote(item.id, 'down')}
+                        />
+                      </div>
+
+                      {/* Item content */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <div className="flex items-center gap-2 mb-2">
+                              {/* Score badge */}
+                              <div className={cn(
+                                'px-1.5 py-0.5 rounded-md text-xs font-medium tabular-nums border min-w-[3ch] text-center',
+                                item.score > 0 && 'bg-green-50 border-green-200 text-green-700 dark:bg-green-950 dark:border-green-800 dark:text-green-300',
+                                item.score < 0 && 'bg-red-50 border-red-200 text-red-700 dark:bg-red-950 dark:border-red-800 dark:text-red-300',
+                                item.score === 0 && 'bg-muted border-muted-foreground/20 text-muted-foreground'
+                              )}>
+                                {item.score > 0 && '+'}
+                                {item.score}
+                              </div>
+                              <h3 className="font-medium leading-none">
+                                {item.title}
+                              </h3>
+                              {/* Status badge */}
+                              <div className={cn(
+                                'px-2 py-0.5 rounded-full text-xs font-medium',
+                                getStatusDisplay(item.status).color === 'blue' && 'bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300',
+                                getStatusDisplay(item.status).color === 'green' && 'bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300',
+                                getStatusDisplay(item.status).color === 'red' && 'bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300'
+                              )}>
+                                {getStatusDisplay(item.status).label}
+                              </div>
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              Created {formatDistanceToNow(new Date(item.createdAt))} ago
+                            </div>
                           </div>
+                          {address === initiative.createdBy && (
+                            <EditItemStatusDialog
+                              initiativeId={initiative.id}
+                              item={item}
+                              onItemUpdated={fetchInitiative}
+                            />
+                          )}
                         </div>
-                        {address && canEditItemStatus(address) && (
-                          <EditItemStatusDialog
-                            initiativeId={params.id}
-                            item={item}
-                            onItemUpdated={fetchInitiative}
-                          />
+                        {item.description && (
+                          <div className="mt-2 prose dark:prose-invert">
+                            <ReactMarkdown>{item.description}</ReactMarkdown>
+                          </div>
                         )}
                       </div>
                     </div>

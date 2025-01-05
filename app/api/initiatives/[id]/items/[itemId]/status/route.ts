@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { withAdminAuth } from '@/lib/auth';
+import { withInitiativeOwnerAuth } from '@/lib/auth';
 import { z } from 'zod';
 
 const updateSchema = z.object({
@@ -11,7 +11,7 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string; itemId: string } }
 ) {
-  return withAdminAuth(request, async (req, address) => {
+  return withInitiativeOwnerAuth(request, params.id, async (req, address) => {
     try {
       const item = await prisma.item.findUnique({
         where: {
