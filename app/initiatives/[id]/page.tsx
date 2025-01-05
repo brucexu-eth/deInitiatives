@@ -89,22 +89,30 @@ export default function InitiativeDetailPage() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            voteType: type,
+            type,
             voter: address,
           }),
         }
       );
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Failed to vote');
+        throw new Error(data.error || 'Failed to vote');
       }
 
       await fetchInitiative();
+      
+      // Show success toast
+      toast({
+        title: 'Success',
+        description: 'Vote recorded successfully',
+      });
     } catch (error) {
       console.error('Error voting:', error);
       toast({
         title: 'Error',
-        description: 'Failed to vote',
+        description: error instanceof Error ? error.message : 'Failed to vote',
         variant: 'destructive',
       });
     } finally {

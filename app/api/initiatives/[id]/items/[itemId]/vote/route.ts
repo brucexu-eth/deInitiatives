@@ -15,6 +15,8 @@ export async function POST(
 ) {
   try {
     const json = await request.json();
+    console.log('Received vote request:', json);
+    
     const body = voteSchema.parse(json);
 
     const existingVote = await prisma.vote.findFirst({
@@ -60,6 +62,8 @@ export async function POST(
 
     return NextResponse.json({ upVotes, downVotes });
   } catch (error) {
+    console.error('Error processing vote:', error);
+    
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Invalid request data', details: error.errors },
@@ -67,9 +71,16 @@ export async function POST(
       );
     }
 
-    console.error('Error processing vote:', error);
+    // Check if the error is related to database constraints
+    if (error instanceof Error && error.message.includes('Unique constraint')) {
+      return NextResponse.json(
+        { error: 'You have already voted on this item' },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
-      { error: 'Failed to process vote' },
+      { error: 'Failed to process vote', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }
