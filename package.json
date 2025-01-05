@@ -29,6 +29,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
     "encoding": "^0.1.13",
+    "jose": "^5.9.6",
     "lucide-react": "^0.446.0",
     "next": "13.5.1",
     "pino-pretty": "^10.3.1",

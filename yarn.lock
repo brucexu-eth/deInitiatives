@@ -3783,6 +3783,11 @@ jiti@^1.18.2:
   resolved "https://registry.npmjs.org/jiti/-/jiti-1.21.7.tgz"
   integrity sha512-/imKNG4EbWNrVjoNC/1H5/9GFy+tqjGBHCaSsN+P2RnPqjsLmv6UD3Ej+Kj8nBWaRAwyk7kK5ZUc+OEatnTR3A==
 
+jose@^5.9.6:
+  version "5.9.6"
+  resolved "https://registry.npmjs.org/jose/-/jose-5.9.6.tgz"
+  integrity sha512-AMlnetc9+CV9asI19zHmrgS/WYsWUwCn2R7RzlbJWD7F9eWYUTGyBmU9o6PxngtLGOiDGPRu+Uc4fhKzbpteZQ==
+
 joycon@^3.1.1:
   version "3.1.1"
   resolved "https://registry.npmjs.org/joycon/-/joycon-3.1.1.tgz"

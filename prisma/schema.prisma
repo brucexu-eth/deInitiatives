@@ -48,3 +48,11 @@ model Vote {
 
   @@unique([itemId, voter])
 }
+
+model AuthNonce {
+  id        String   @id @default(cuid())
+  address   String
+  nonce     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

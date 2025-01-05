@@ -30,6 +30,7 @@ import {
 } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 import { Settings } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 const formSchema = z.object({
   status: z.enum(['active', 'completed', 'cancelled']),
@@ -54,6 +55,7 @@ export function EditItemStatusDialog({
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const { token } = useAuth();
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -63,6 +65,15 @@ export function EditItemStatusDialog({
   });
 
   const onSubmit = async (data: FormData) => {
+    if (!token) {
+      toast({
+        title: 'Error',
+        description: 'Please connect your wallet and sign in',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const response = await fetch(
@@ -71,6 +82,7 @@ export function EditItemStatusDialog({
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
           },
           body: JSON.stringify(data),
         }

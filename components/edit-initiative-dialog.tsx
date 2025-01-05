@@ -25,6 +25,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import { Pencil } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 const formSchema = z.object({
   title: z.string().min(1, 'Title is required').max(100, 'Title is too long'),
@@ -49,6 +50,7 @@ export function EditInitiativeDialog({
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const { token } = useAuth();
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -59,12 +61,22 @@ export function EditInitiativeDialog({
   });
 
   const onSubmit = async (data: FormData) => {
+    if (!token) {
+      toast({
+        title: 'Error',
+        description: 'Please connect your wallet and sign in',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const response = await fetch(`/api/initiatives/${initiative.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(data),
       });
