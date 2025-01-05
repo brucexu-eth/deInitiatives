@@ -10,6 +10,7 @@ import { EditItemStatusDialog } from '@/components/edit-item-status-dialog';
 import { useToast } from '@/components/ui/use-toast';
 import { ArrowLeft } from 'lucide-react';
 import { useAccount } from 'wagmi';
+import { useAuth } from '@/hooks/useAuth';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { canEditInitiative, canEditItemStatus } from '@/lib/permissions';
@@ -52,6 +53,7 @@ export default function InitiativeDetailPage({
   params: { id: string };
 }) {
   const { address } = useAccount();
+  const { token } = useAuth();
   const { toast } = useToast();
   const [initiative, setInitiative] = useState<Initiative | null>(null);
   const [votingItemId, setVotingItemId] = useState<string | null>(null);
@@ -78,8 +80,13 @@ export default function InitiativeDetailPage({
   }, [params.id, toast]);
 
   const handleVote = async (itemId: string, type: 'up' | 'down') => {
-    if (!address) {
-      return; // RequireWallet component will handle this case
+    if (!token) {
+      toast({
+        title: 'Error',
+        description: 'Please connect your wallet and sign in',
+        variant: 'destructive',
+      });
+      return;
     }
 
     setVotingItemId(itemId);
@@ -90,11 +97,9 @@ export default function InitiativeDetailPage({
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
           },
-          body: JSON.stringify({
-            type,
-            voter: address,
-          }),
+          body: JSON.stringify({ type }),
         }
       );
 

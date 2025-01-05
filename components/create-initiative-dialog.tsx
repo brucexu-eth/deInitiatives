@@ -26,6 +26,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { PlusCircle } from 'lucide-react';
 import { useAccount } from 'wagmi';
+import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/components/ui/use-toast';
 
 const formSchema = z.object({
@@ -45,6 +46,7 @@ export function CreateInitiativeDialog({
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { address } = useAccount();
+  const { token } = useAuth();
   const { toast } = useToast();
 
   const form = useForm<FormData>({
@@ -56,10 +58,10 @@ export function CreateInitiativeDialog({
   });
 
   const onSubmit = async (data: FormData) => {
-    if (!address) {
+    if (!token) {
       toast({
         title: 'Error',
-        description: 'Please connect your wallet first',
+        description: 'Please connect your wallet and sign in',
         variant: 'destructive',
       });
       return;
@@ -71,11 +73,9 @@ export function CreateInitiativeDialog({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          ...data,
-          createdBy: address,
-        }),
+        body: JSON.stringify(data),
       });
 
       if (!response.ok) {

@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { withAuth } from '@/lib/auth';
 import { z } from 'zod';
 
 // Mark route as dynamic
@@ -8,7 +9,6 @@ export const dynamic = 'force-dynamic';
 const initiativeSchema = z.object({
   title: z.string().min(1, 'Title is required').max(100, 'Title is too long'),
   description: z.string().min(1, 'Description is required'),
-  createdBy: z.string().min(1, 'Creator address is required'),
 });
 
 export async function GET() {
@@ -36,32 +36,34 @@ export async function GET() {
   }
 }
 
-export async function POST(request: Request) {
-  try {
-    const json = await request.json();
-    const body = initiativeSchema.parse(json);
+export async function POST(request: NextRequest) {
+  return withAuth(request, async (req, address) => {
+    try {
+      const json = await req.json();
+      const body = initiativeSchema.parse(json);
 
-    const initiative = await prisma.initiative.create({
-      data: {
-        title: body.title,
-        description: body.description,
-        createdBy: body.createdBy,
-      },
-    });
+      const initiative = await prisma.initiative.create({
+        data: {
+          title: body.title,
+          description: body.description,
+          createdBy: address,
+        },
+      });
 
-    return NextResponse.json(initiative, { status: 201 });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
+      return NextResponse.json(initiative, { status: 201 });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return NextResponse.json(
+          { error: 'Invalid request data', details: error.errors },
+          { status: 400 }
+        );
+      }
+
+      console.error('Error creating initiative:', error);
       return NextResponse.json(
-        { error: 'Invalid request data', details: error.errors },
-        { status: 400 }
+        { error: 'Failed to create initiative' },
+        { status: 500 }
       );
     }
-
-    console.error('Error creating initiative:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
-  }
+  });
 }

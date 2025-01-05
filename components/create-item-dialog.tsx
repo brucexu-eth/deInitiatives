@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useAccount } from 'wagmi';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -45,6 +46,7 @@ export function CreateItemDialog({ initiativeId, onItemCreated }: CreateItemDial
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { address } = useAccount();
+  const { token } = useAuth();
   const { toast } = useToast();
 
   const form = useForm<FormData>({
@@ -58,10 +60,10 @@ export function CreateItemDialog({ initiativeId, onItemCreated }: CreateItemDial
   const titleValue = form.watch('title');
 
   const onSubmit = async (data: FormData) => {
-    if (!address) {
+    if (!token) {
       toast({
         title: 'Error',
-        description: 'Please connect your wallet first',
+        description: 'Please connect your wallet and sign in',
         variant: 'destructive',
       });
       return;
@@ -73,11 +75,9 @@ export function CreateItemDialog({ initiativeId, onItemCreated }: CreateItemDial
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          ...data,
-          createdBy: address,
-        }),
+        body: JSON.stringify(data),
       });
 
       if (!response.ok) {
