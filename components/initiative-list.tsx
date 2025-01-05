@@ -3,18 +3,18 @@
 import { useEffect, useState } from 'react';
 import { Initiative } from '@/lib/types';
 import { supabase } from '@/lib/supabase';
-import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import { useAccount } from 'wagmi';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
+import { CreateInitiativeDialog } from './create-initiative-dialog';
 
 export function InitiativeList() {
   const [initiatives, setInitiatives] = useState<Initiative[]>([]);
   const { address } = useAccount();
 
-  useEffect(() => {
-    const fetchInitiatives = async () => {
+  const fetchInitiatives = async () => {
+    try {
       const { data, error } = await supabase
         .from('initiatives')
         .select('*')
@@ -27,8 +27,12 @@ export function InitiativeList() {
       }
 
       setInitiatives(data);
-    };
+    } catch (error) {
+      console.error('Error fetching initiatives:', error);
+    }
+  };
 
+  useEffect(() => {
     fetchInitiatives();
 
     // Subscribe to real-time changes
@@ -46,15 +50,29 @@ export function InitiativeList() {
     };
   }, []);
 
+  if (initiatives.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <div className="rounded-lg border-2 border-dashed border-gray-300 p-12 max-w-lg">
+          <PlusCircle className="mx-auto h-12 w-12 text-gray-400" />
+          <h3 className="mt-4 text-lg font-semibold text-gray-900">No initiatives yet</h3>
+          <p className="mt-2 text-sm text-gray-500">
+            Get started by creating a new initiative for your community.
+          </p>
+          <div className="mt-6">
+            <CreateInitiativeDialog onInitiativeCreated={fetchInitiatives} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-3xl font-bold">Initiatives</h2>
         {address && (
-          <Button>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Create Initiative
-          </Button>
+          <CreateInitiativeDialog onInitiativeCreated={fetchInitiatives} />
         )}
       </div>
 
