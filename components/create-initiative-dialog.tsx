@@ -26,7 +26,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { PlusCircle } from 'lucide-react';
 import { useAccount } from 'wagmi';
-import { prisma } from '@/lib/prisma';
+import { useToast } from '@/components/ui/use-toast';
 
 const formSchema = z.object({
   title: z.string().min(1, 'Title is required').max(100, 'Title is too long'),
@@ -39,9 +39,14 @@ interface CreateInitiativeDialogProps {
   onInitiativeCreated: () => void;
 }
 
-export function CreateInitiativeDialog({ onInitiativeCreated }: CreateInitiativeDialogProps) {
+export function CreateInitiativeDialog({
+  onInitiativeCreated,
+}: CreateInitiativeDialogProps) {
   const [open, setOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { address } = useAccount();
+  const { toast } = useToast();
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -51,22 +56,53 @@ export function CreateInitiativeDialog({ onInitiativeCreated }: CreateInitiative
   });
 
   const onSubmit = async (data: FormData) => {
-    if (!address) return;
-
-    try {
-      await prisma.initiative.create({
-        data: {
-          title: data.title,
-          description: data.description,
-          createdBy: address,
-        },
+    if (!address) {
+      toast({
+        title: 'Error',
+        description: 'Please connect your wallet first',
+        variant: 'destructive',
       });
-      
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch('/api/initiatives', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...data,
+          createdBy: address,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to create initiative');
+      }
+
+      toast({
+        title: 'Success',
+        description: 'Initiative created successfully',
+      });
+
       form.reset();
       setOpen(false);
       onInitiativeCreated();
     } catch (error) {
       console.error('Error creating initiative:', error);
+      toast({
+        title: 'Error',
+        description:
+          error instanceof Error
+            ? error.message
+            : 'Failed to create initiative',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -82,7 +118,8 @@ export function CreateInitiativeDialog({ onInitiativeCreated }: CreateInitiative
         <DialogHeader>
           <DialogTitle>Create New Initiative</DialogTitle>
           <DialogDescription>
-            Create a new initiative for your community. You can use Markdown in the description.
+            Create a new initiative for your community. You can use Markdown in
+            the description.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -118,7 +155,9 @@ export function CreateInitiativeDialog({ onInitiativeCreated }: CreateInitiative
               )}
             />
             <DialogFooter>
-              <Button type="submit">Create Initiative</Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Creating...' : 'Create Initiative'}
+              </Button>
             </DialogFooter>
           </form>
         </Form>
