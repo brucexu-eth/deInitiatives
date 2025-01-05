@@ -1,0 +1,48 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Initiative {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  status      String   @default("active") // active, completed, cancelled
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String // wallet address of creator
+  items       Item[] // List of items/proposals in this initiative
+}
+
+model Item {
+  id           String     @id @default(cuid())
+  initiative   Initiative @relation(fields: [initiativeId], references: [id])
+  initiativeId String
+  title        String
+  description  String
+  status       String     @default("active") // active, completed, cancelled
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  createdBy    String // wallet address of creator
+  votes        Vote[]
+  upVotes      Int        @default(0)
+  downVotes    Int        @default(0)
+}
+
+model Vote {
+  id        String   @id @default(cuid())
+  item      Item     @relation(fields: [itemId], references: [id])
+  itemId    String
+  voter     String // wallet address of voter
+  voteType  String // up, down
+  createdAt DateTime @default(now())
+
+  @@unique([itemId, voter])
+}
