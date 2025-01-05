@@ -6,7 +6,7 @@ import ReactMarkdown from 'react-markdown';
 import { formatDistanceToNow } from 'date-fns';
 import { CreateItemDialog } from '@/components/create-item-dialog';
 import { useToast } from '@/components/ui/use-toast';
-import { ArrowLeft, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { ArrowLeft, ChevronUp, ChevronDown } from 'lucide-react';
 import { useAccount } from 'wagmi';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
@@ -151,87 +151,100 @@ export default function InitiativeDetailPage() {
       </Link>
 
       <div className="space-y-8">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold">{initiative.title}</h1>
-          <div className="mt-2 text-sm text-muted-foreground">
+        <div className="text-center space-y-4">
+          <h1 className="text-3xl font-bold">
+            <ReactMarkdown className="prose dark:prose-invert max-w-none inline">{initiative.title}</ReactMarkdown>
+          </h1>
+          <div className="text-sm text-muted-foreground">
             Created by {initiative.createdBy.slice(0, 6)}...{initiative.createdBy.slice(-4)}{' '}
             {formatDistanceToNow(new Date(initiative.createdAt))} ago
           </div>
-          <div className="mt-6 prose max-w-none">
+          <div className="prose dark:prose-invert max-w-none">
             <ReactMarkdown>{initiative.description}</ReactMarkdown>
           </div>
         </div>
 
-        <div>
-          <div className="flex items-center justify-between mb-4">
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold">Items</h2>
             <CreateItemDialog
-              initiativeId={initiative.id}
+              initiativeId={params.id}
               onItemCreated={fetchInitiative}
             />
           </div>
 
-          {initiative.items.length === 0 ? (
-            <div className="text-center py-12 border rounded-lg">
-              <div className="text-muted-foreground">No items yet</div>
-              <div className="mt-2 text-sm text-muted-foreground">
-                Create the first item for this initiative
-              </div>
-            </div>
-          ) : (
-            <div className="divide-y divide-gray-200 rounded-lg border">
-              {initiative.items.map((item) => (
-                <div key={item.id} className="flex gap-4 p-4">
-                  <div className="flex flex-col items-center gap-2 pt-1">
-                    <button
-                      onClick={() => handleVote(item.id, 'up')}
-                      disabled={votingItemId === item.id}
-                      className={cn(
-                        'p-1 rounded hover:bg-muted transition-colors',
-                        item.votes.some(
-                          (v) => v.voter === address && v.voteType === 'up'
-                        ) && 'text-green-600'
-                      )}
-                    >
-                      <ThumbsUp className="h-4 w-4" />
-                    </button>
-                    <span className="text-sm font-medium">
-                      {item._count.votes.up}
-                    </span>
-                    <button
-                      onClick={() => handleVote(item.id, 'down')}
-                      disabled={votingItemId === item.id}
-                      className={cn(
-                        'p-1 rounded hover:bg-muted transition-colors',
-                        item.votes.some(
-                          (v) => v.voter === address && v.voteType === 'down'
-                        ) && 'text-red-600'
-                      )}
-                    >
-                      <ThumbsDown className="h-4 w-4" />
-                    </button>
-                    <span className="text-sm font-medium">
-                      {item._count.votes.down}
-                    </span>
-                  </div>
-                  <div className="flex-1">
-                    <div className="prose prose-sm max-w-none">
-                      <ReactMarkdown>{item.title}</ReactMarkdown>
-                    </div>
-                    {item.description && (
-                      <div className="mt-2 text-sm text-muted-foreground">
-                        {item.description}
-                      </div>
-                    )}
-                    <div className="mt-2 text-xs text-muted-foreground">
-                      by {item.createdBy.slice(0, 6)}...{item.createdBy.slice(-4)}{' '}
-                      {formatDistanceToNow(new Date(item.createdAt))} ago
-                    </div>
-                  </div>
+          <div className="space-y-4">
+            {initiative.items.length === 0 ? (
+              <div className="text-center py-12 border rounded-lg">
+                <div className="text-muted-foreground">No items yet</div>
+                <div className="mt-2 text-sm text-muted-foreground">
+                  Create the first item for this initiative
                 </div>
-              ))}
-            </div>
-          )}
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-200 rounded-lg border">
+                {initiative.items.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex gap-4 items-start p-4 rounded-lg border bg-card"
+                  >
+                    <div className="flex flex-col items-center gap-2">
+                      <button
+                        onClick={() => handleVote(item.id, 'up')}
+                        disabled={votingItemId === item.id}
+                        className={cn(
+                          'p-1 rounded hover:bg-muted transition-colors',
+                          item.votes.some(
+                            (v) => v.voter === address && v.voteType === 'up'
+                          ) && 'text-green-600'
+                        )}
+                      >
+                        <ChevronUp className="h-6 w-6" />
+                      </button>
+                      <span
+                        className={cn(
+                          'text-sm tabular-nums',
+                          votingItemId === item.id && 'opacity-50'
+                        )}
+                      >
+                        {item._count.votes.up}
+                      </span>
+                      <button
+                        onClick={() => handleVote(item.id, 'down')}
+                        disabled={votingItemId === item.id}
+                        className={cn(
+                          'p-1 rounded hover:bg-muted transition-colors',
+                          item.votes.some(
+                            (v) => v.voter === address && v.voteType === 'down'
+                          ) && 'text-red-600'
+                        )}
+                      >
+                        <ChevronDown className="h-6 w-6" />
+                      </button>
+                      <span
+                        className={cn(
+                          'text-sm tabular-nums',
+                          votingItemId === item.id && 'opacity-50'
+                        )}
+                      >
+                        {item._count.votes.down}
+                      </span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="prose dark:prose-invert max-w-none">
+                        <ReactMarkdown>{item.title}</ReactMarkdown>
+                      </div>
+                      {item.description && (
+                        <div className="mt-1 prose dark:prose-invert prose-sm max-w-none">
+                          <ReactMarkdown>{item.description}</ReactMarkdown>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

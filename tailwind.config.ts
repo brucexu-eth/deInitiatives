@@ -8,7 +8,52 @@ const config: Config = {
     './app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
+    container: {
+      center: true,
+      padding: '2rem',
+      screens: {
+        '2xl': '1400px',
+      },
+    },
     extend: {
+      typography: {
+        DEFAULT: {
+          css: {
+            maxWidth: 'none',
+            color: 'hsl(var(--foreground))',
+            a: {
+              color: 'hsl(var(--primary))',
+              textDecoration: 'none',
+              '&:hover': {
+                color: 'hsl(var(--primary))',
+                textDecoration: 'underline',
+              },
+            },
+            'h1, h2, h3, h4, h5, h6': {
+              color: 'hsl(var(--foreground))',
+            },
+            code: {
+              color: 'hsl(var(--foreground))',
+              backgroundColor: 'hsl(var(--muted))',
+              borderRadius: '0.25rem',
+              padding: '0.125rem 0.25rem',
+              '&::before': { content: '""' },
+              '&::after': { content: '""' },
+            },
+            pre: {
+              backgroundColor: 'hsl(var(--muted))',
+              color: 'hsl(var(--foreground))',
+            },
+            strong: {
+              color: 'hsl(var(--foreground))',
+            },
+            blockquote: {
+              color: 'hsl(var(--muted-foreground))',
+              borderLeftColor: 'hsl(var(--border))',
+            },
+          },
+        },
+      },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic':
@@ -85,6 +130,7 @@ const config: Config = {
       },
     },
   },
-  plugins: [require('tailwindcss-animate')],
+  plugins: [require('@tailwindcss/typography'), require('tailwindcss-animate')],
 };
+
 export default config;
