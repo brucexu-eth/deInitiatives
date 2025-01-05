@@ -31,16 +31,31 @@ export function ConnectButton() {
             {(() => {
               if (!connected) {
                 return (
-                  <Button onClick={openConnectModal}>
-                    Connect Wallet
+                  <Button onClick={openConnectModal}>Connect Wallet</Button>
+                );
+              }
+
+              if (chain.unsupported) {
+                return (
+                  <Button onClick={openChainModal} variant="destructive">
+                    Wrong network
                   </Button>
                 );
               }
 
               return (
-                <Button onClick={openAccountModal}>
-                  {account.displayName}
-                </Button>
+                <div className="flex gap-3">
+                  <Button onClick={openChainModal} variant="outline" size="sm">
+                    {chain.name}
+                  </Button>
+                  <Button
+                    onClick={openAccountModal}
+                    variant="outline"
+                    size="sm"
+                  >
+                    {account.displayName}
+                  </Button>
+                </div>
               );
             })()}
           </div>

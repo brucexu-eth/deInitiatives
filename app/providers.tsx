@@ -1,9 +1,10 @@
 'use client';
 
 import { getDefaultConfig, RainbowKitProvider } from '@rainbow-me/rainbowkit';
-import { mainnet } from 'viem/chains';
+import { mainnet, sepolia } from 'viem/chains';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { WagmiProvider } from 'wagmi';
+import '@rainbow-me/rainbowkit/styles.css';
 
 const projectId = process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID;
 if (!projectId) {
@@ -13,7 +14,7 @@ if (!projectId) {
 const config = getDefaultConfig({
   appName: 'DeInitiatives',
   projectId,
-  chains: [mainnet],
+  chains: [mainnet, sepolia],
   ssr: true,
 });
 
@@ -23,7 +24,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider>{children}</RainbowKitProvider>
+        <RainbowKitProvider>
+          {children}
+        </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
   );
