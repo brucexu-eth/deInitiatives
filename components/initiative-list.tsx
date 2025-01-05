@@ -8,6 +8,7 @@ import ReactMarkdown from 'react-markdown';
 import { CreateInitiativeDialog } from './create-initiative-dialog';
 import { useToast } from '@/components/ui/use-toast';
 import { formatDistanceToNow } from 'date-fns';
+import { Button } from '@/components/ui/button';
 import { RequireWallet } from '@/components/require-wallet';
 
 interface Initiative {
@@ -71,9 +72,13 @@ export function InitiativeList() {
               Get started by creating a new initiative for your community.
             </p>
             <div className="mt-6">
-              <RequireWallet>
+              {address ? (
                 <CreateInitiativeDialog onInitiativeCreated={fetchInitiatives} />
-              </RequireWallet>
+              ) : (
+                <RequireWallet>
+                  <Button>Connect Wallet to Create</Button>
+                </RequireWallet>
+              )}
             </div>
           </div>
         </div>
@@ -86,9 +91,13 @@ export function InitiativeList() {
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold">Initiatives</h2>
-          <RequireWallet>
+          {address ? (
             <CreateInitiativeDialog onInitiativeCreated={fetchInitiatives} />
-          </RequireWallet>
+          ) : (
+            <RequireWallet>
+              <Button>Connect Wallet to Create</Button>
+            </RequireWallet>
+          )}
         </div>
         <div className="divide-y divide-gray-200 rounded-lg border bg-card">
           {initiatives.map((initiative) => (

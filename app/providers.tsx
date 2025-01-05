@@ -34,14 +34,14 @@ const queryClient = new QueryClient();
 
 function WalletAuthWrapper({ children }: { children: React.ReactNode }) {
   const { address, isConnected } = useAccount();
-  const { login, token, isLoading } = useAuth();
+  const { login, token } = useAuth();
 
   // Only try to login when first connecting and there's no stored token
   React.useEffect(() => {
-    if (isConnected && address && !token && !isLoading) {
+    if (isConnected && address && !token) {
       login().catch(console.error);
     }
-  }, [isConnected, address, token, login, isLoading]);
+  }, [isConnected, address, token, login]);
 
   return <>{children}</>;
 }

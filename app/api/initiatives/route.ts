@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { withAuth } from '@/lib/auth';
+import { withAuth, withOptionalAuth } from '@/lib/auth';
 import { z } from 'zod';
 
 // Mark route as dynamic
@@ -11,29 +11,31 @@ const initiativeSchema = z.object({
   description: z.string().min(1, 'Description is required'),
 });
 
-export async function GET() {
-  try {
-    const initiatives = await prisma.initiative.findMany({
-      orderBy: {
-        createdAt: 'desc',
-      },
-      include: {
-        _count: {
-          select: {
-            items: true,
+export async function GET(request: NextRequest) {
+  return withOptionalAuth(request, async (req, address) => {
+    try {
+      const initiatives = await prisma.initiative.findMany({
+        orderBy: {
+          createdAt: 'desc',
+        },
+        include: {
+          _count: {
+            select: {
+              items: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    return NextResponse.json(initiatives);
-  } catch (error) {
-    console.error('Error fetching initiatives:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch initiatives' },
-      { status: 500 }
-    );
-  }
+      return NextResponse.json(initiatives);
+    } catch (error) {
+      console.error('Error fetching initiatives:', error);
+      return NextResponse.json(
+        { error: 'Failed to fetch initiatives' },
+        { status: 500 }
+      );
+    }
+  });
 }
 
 export async function POST(request: NextRequest) {

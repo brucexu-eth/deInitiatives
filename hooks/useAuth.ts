@@ -7,7 +7,7 @@ export function useAuth() {
   const { address } = useAccount();
   const { signMessageAsync } = useSignMessage();
   const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Load token from localStorage on mount
   useEffect(() => {
@@ -15,13 +15,13 @@ export function useAuth() {
     if (storedToken) {
       setToken(storedToken);
     }
-    setIsLoading(false);
   }, []);
 
   const login = useCallback(async () => {
     if (!address) return;
 
     try {
+      setIsLoading(true);
       // Get nonce
       const nonceResponse = await fetch(`/api/auth/nonce?address=${address}`);
       if (!nonceResponse.ok) {
@@ -53,15 +53,14 @@ export function useAuth() {
       }
 
       const { token: newToken } = await verifyResponse.json();
-
-      // Store token
       localStorage.setItem('auth_token', newToken);
       setToken(newToken);
-
-      return newToken;
     } catch (error) {
       console.error('Login error:', error);
-      throw error;
+      localStorage.removeItem('auth_token');
+      setToken(null);
+    } finally {
+      setIsLoading(false);
     }
   }, [address, signMessageAsync]);
 

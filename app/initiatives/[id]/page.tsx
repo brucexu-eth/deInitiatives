@@ -15,6 +15,8 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { canEditInitiative, canEditItemStatus } from '@/lib/permissions';
 import { VoteButton } from '@/components/vote-button';
+import { ChevronUp, ChevronDown } from 'lucide-react';
+import { RequireWallet, Button } from '@/components/require-wallet';
 
 interface Vote {
   id: string;
@@ -197,10 +199,16 @@ export default function InitiativeDetailPage({
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold">Items</h2>
-            <CreateItemDialog
-              initiativeId={params.id}
-              onItemCreated={fetchInitiative}
-            />
+            {address ? (
+              <CreateItemDialog
+                initiativeId={initiative.id}
+                onItemCreated={fetchInitiative}
+              />
+            ) : (
+              <RequireWallet>
+                <Button className="w-full">Connect Wallet to Create Item</Button>
+              </RequireWallet>
+            )}
           </div>
 
           <div className="space-y-4">
@@ -225,30 +233,53 @@ export default function InitiativeDetailPage({
                     <div className="flex gap-4">
                       {/* Vote buttons */}
                       <div className="flex items-center gap-2">
-                        <VoteButton
-                          type="up"
-                          count={item._count.votes.up}
-                          isVoted={item.votes.some(
-                            (v) => v.voter === address && v.voteType === 'up'
-                          )}
-                          isDisabled={
-                            votingItemId === item.id ||
-                            item.status !== 'active'
-                          }
-                          onClick={() => handleVote(item.id, 'up')}
-                        />
-                        <VoteButton
-                          type="down"
-                          count={item._count.votes.down}
-                          isVoted={item.votes.some(
-                            (v) => v.voter === address && v.voteType === 'down'
-                          )}
-                          isDisabled={
-                            votingItemId === item.id ||
-                            item.status !== 'active'
-                          }
-                          onClick={() => handleVote(item.id, 'down')}
-                        />
+                        {address ? (
+                          <>
+                            <VoteButton
+                              type="up"
+                              count={item._count.votes.up}
+                              isVoted={item.votes.some(
+                                (v) => v.voter === address && v.voteType === 'up'
+                              )}
+                              isDisabled={
+                                votingItemId === item.id ||
+                                item.status !== 'active'
+                              }
+                              onClick={() => handleVote(item.id, 'up')}
+                            />
+                            <VoteButton
+                              type="down"
+                              count={item._count.votes.down}
+                              isVoted={item.votes.some(
+                                (v) => v.voter === address && v.voteType === 'down'
+                              )}
+                              isDisabled={
+                                votingItemId === item.id ||
+                                item.status !== 'active'
+                              }
+                              onClick={() => handleVote(item.id, 'down')}
+                            />
+                          </>
+                        ) : (
+                          <>
+                            <div className="flex items-center gap-1">
+                              <div className="p-1 rounded opacity-50">
+                                <ChevronUp className="h-4 w-4" />
+                              </div>
+                              <span className="text-sm tabular-nums min-w-[2ch] text-center opacity-50">
+                                {item._count.votes.up}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <div className="p-1 rounded opacity-50">
+                                <ChevronDown className="h-4 w-4" />
+                              </div>
+                              <span className="text-sm tabular-nums min-w-[2ch] text-center opacity-50">
+                                {item._count.votes.down}
+                              </span>
+                            </div>
+                          </>
+                        )}
                       </div>
 
                       {/* Item content */}

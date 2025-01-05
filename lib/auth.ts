@@ -34,6 +34,28 @@ export async function withAuth(
   }
 }
 
+// 可选认证中间件，不要求必须登录
+export async function withOptionalAuth(
+  req: NextRequest,
+  handler: AuthHandler
+): Promise<NextResponse> {
+  try {
+    const token = req.headers.get('authorization')?.split(' ')[1];
+
+    if (!token) {
+      // 如果没有token，传入空地址
+      return handler(req, '');
+    }
+
+    const payload = await verifyToken(token);
+    return handler(req, payload.address);
+  } catch (error) {
+    // 如果token无效，也传入空地址
+    console.error('Authentication error:', error);
+    return handler(req, '');
+  }
+}
+
 // Initiative所有者认证中间件
 export async function withInitiativeOwnerAuth(
   req: NextRequest,

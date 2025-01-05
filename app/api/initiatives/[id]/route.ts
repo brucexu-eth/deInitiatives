@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { withAuth } from '@/lib/auth';
+import { withAuth, withOptionalAuth } from '@/lib/auth';
 import { canEditInitiative } from '@/lib/permissions';
 import { z } from 'zod';
 
@@ -15,63 +15,74 @@ export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  try {
-    const initiative = await prisma.initiative.findUnique({
-      where: { id: params.id },
-      include: {
-        items: {
-          include: {
-            votes: true,
-          },
-        },
-      },
-    });
-
-    if (!initiative) {
-      return NextResponse.json(
-        { error: 'Initiative not found' },
-        { status: 404 }
-      );
-    }
-
-    // Transform the data to include up and down vote counts and calculate score
-    const transformedInitiative = {
-      ...initiative,
-      items: initiative.items
-        .map((item) => {
-          const upVotes = item.votes.filter((v) => v.voteType === 'up').length;
-          const downVotes = item.votes.filter((v) => v.voteType === 'down').length;
-          const score = upVotes - downVotes;
-          
-          return {
-            ...item,
-            _count: {
-              votes: {
-                up: upVotes,
-                down: downVotes,
+  return withOptionalAuth(request, async (req, address) => {
+    try {
+      const initiative = await prisma.initiative.findUnique({
+        where: { id: params.id },
+        include: {
+          items: {
+            include: {
+              votes: true,
+              _count: {
+                select: {
+                  votes: {
+                    where: {
+                      voteType: 'up',
+                    },
+                  },
+                },
               },
             },
-            score,
-          };
-        })
-        .sort((a, b) => {
-          // First sort by score (descending)
-          if (b.score !== a.score) {
-            return b.score - a.score;
-          }
-          // If scores are equal, sort by creation date (newest first)
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-        }),
-    };
+          },
+        },
+      });
 
-    return NextResponse.json(transformedInitiative);
-  } catch (error) {
-    console.error('Error fetching initiative:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch initiative' },
-      { status: 500 }
-    );
-  }
+      if (!initiative) {
+        return NextResponse.json(
+          { error: 'Initiative not found' },
+          { status: 404 }
+        );
+      }
+
+      // Transform the data to include up and down vote counts and calculate score
+      const transformedInitiative = {
+        ...initiative,
+        items: initiative.items
+          .map((item) => {
+            const upVotes = item.votes.filter((v) => v.voteType === 'up').length;
+            const downVotes = item.votes.filter((v) => v.voteType === 'down').length;
+            const score = upVotes - downVotes;
+            
+            return {
+              ...item,
+              _count: {
+                votes: {
+                  up: upVotes,
+                  down: downVotes,
+                },
+              },
+              score,
+            };
+          })
+          .sort((a, b) => {
+            // First sort by score (descending)
+            if (b.score !== a.score) {
+              return b.score - a.score;
+            }
+            // If scores are equal, sort by creation date (newest first)
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          }),
+      };
+
+      return NextResponse.json(transformedInitiative);
+    } catch (error) {
+      console.error('Error fetching initiative:', error);
+      return NextResponse.json(
+        { error: 'Failed to fetch initiative' },
+        { status: 500 }
+      );
+    }
+  });
 }
 
 export async function PUT(
