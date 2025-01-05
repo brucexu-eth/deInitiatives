@@ -108,7 +108,23 @@ export function InitiativeList() {
             >
               <div className="p-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-medium">{initiative.title}</h3>
+                  <h3 className="font-medium prose dark:prose-invert max-w-none">
+                    <ReactMarkdown components={{
+                      p: ({ children }) => <>{children}</>,
+                      a: ({ href, children }) => (
+                        <a
+                          href={href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 dark:text-blue-400 hover:underline"
+                        >
+                          {children}
+                        </a>
+                      ),
+                    }}>
+                      {initiative.title}
+                    </ReactMarkdown>
+                  </h3>
                   <span className="text-sm text-muted-foreground">
                     {initiative._count.items} items
                   </span>

@@ -297,8 +297,24 @@ export default function InitiativeDetailPage({
                                 {item.score > 0 && '+'}
                                 {item.score}
                               </div>
-                              <h3 className="font-medium leading-none">
-                                {item.title}
+                              <h3 className="font-medium leading-none prose dark:prose-invert max-w-none">
+                                <ReactMarkdown components={{
+                                  // 移除段落标签，避免额外的margin
+                                  p: ({ children }) => <>{children}</>,
+                                  // 自定义链接样式
+                                  a: ({ href, children }) => (
+                                    <a
+                                      href={href}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-blue-600 dark:text-blue-400 hover:underline"
+                                    >
+                                      {children}
+                                    </a>
+                                  ),
+                                }}>
+                                  {item.title}
+                                </ReactMarkdown>
                               </h3>
                               {/* Status badge */}
                               <div className={cn(
