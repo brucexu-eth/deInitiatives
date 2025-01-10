@@ -13,7 +13,7 @@ import {
   coinbaseWallet,
 } from '@rainbow-me/rainbowkit/wallets';
 import { WagmiProvider, useAccount } from 'wagmi';
-import { mainnet, sepolia } from 'wagmi/chains';
+import { mainnet, sepolia, optimism } from 'wagmi/chains';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import '@rainbow-me/rainbowkit/styles.css';
@@ -26,7 +26,7 @@ if (!projectId) {
 const config = getDefaultConfig({
   appName: 'Consensus',
   projectId,
-  chains: [mainnet, sepolia],
+  chains: [mainnet, sepolia, optimism],
   ssr: true,
 });
 
@@ -35,7 +35,9 @@ const queryClient = new QueryClient();
 function WalletAuthWrapper({ children }: { children: React.ReactNode }) {
   const { address, isConnected } = useAccount();
   const { login, token, logout } = useAuth();
-  const [prevAddress, setPrevAddress] = React.useState<string | undefined>(address);
+  const [prevAddress, setPrevAddress] = React.useState<string | undefined>(
+    address
+  );
 
   // 处理钱包切换
   React.useEffect(() => {

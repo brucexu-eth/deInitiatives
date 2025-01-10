@@ -39,9 +39,10 @@ type FormData = z.infer<typeof formSchema>;
 
 interface CreateItemDialogProps {
   topicId: string;
+  onItemCreated?: () => void;
 }
 
-export function CreateItemDialog({ topicId }: CreateItemDialogProps) {
+export function CreateItemDialog({ topicId, onItemCreated }: CreateItemDialogProps) {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { address } = useAccount();
@@ -90,6 +91,7 @@ export function CreateItemDialog({ topicId }: CreateItemDialogProps) {
 
       form.reset();
       setOpen(false);
+      onItemCreated?.(); // Call the callback if provided
     } catch (error) {
       console.error('Error creating item:', error);
       toast({
