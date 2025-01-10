@@ -10,13 +10,15 @@ import { Button } from './ui/button';
 import { RequireWallet } from './require-wallet';
 import { CreateItemDialog } from './create-item-dialog';
 import { EditTopicDialog } from './edit-topic-dialog';
+import { useAuth } from '@/hooks/useAuth';
+
 import ReactMarkdown from 'react-markdown';
 
 interface Topic {
   id: string;
   title: string;
   description: string;
-  status: string;
+  status: 'active' | 'completed' | 'cancelled';
   createdAt: string;
   createdBy: string;
 }
@@ -29,6 +31,7 @@ export function TopicHeader({ topic }: Props) {
   const router = useRouter();
   const { address } = useAccount();
   const [isDeleting, setIsDeleting] = useState(false);
+  const { token } = useAuth();
 
   const handleDelete = async () => {
     if (!confirm('Are you sure you want to delete this topic?')) {
@@ -39,6 +42,10 @@ export function TopicHeader({ topic }: Props) {
     try {
       const response = await fetch(`/api/topics/${topic.id}`, {
         method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (!response.ok) {

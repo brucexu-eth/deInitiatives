@@ -112,7 +112,9 @@ export function CreateTopicDialog({ onTopicCreated }: Props) {
             )}
           </div>
           <div>
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">
+              Description (Markdown supported)
+            </Label>
             <Textarea
               id="description"
               {...register('description')}

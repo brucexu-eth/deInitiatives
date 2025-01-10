@@ -38,11 +38,10 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 interface CreateItemDialogProps {
-  initiativeId: string;
-  onItemCreated: () => void;
+  topicId: string;
 }
 
-export function CreateItemDialog({ initiativeId, onItemCreated }: CreateItemDialogProps) {
+export function CreateItemDialog({ topicId }: CreateItemDialogProps) {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { address } = useAccount();
@@ -71,11 +70,11 @@ export function CreateItemDialog({ initiativeId, onItemCreated }: CreateItemDial
 
     setIsSubmitting(true);
     try {
-      const response = await fetch(`/api/initiatives/${initiativeId}/items`, {
+      const response = await fetch(`/api/topics/${topicId}/items`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(data),
       });
@@ -91,12 +90,12 @@ export function CreateItemDialog({ initiativeId, onItemCreated }: CreateItemDial
 
       form.reset();
       setOpen(false);
-      onItemCreated();
     } catch (error) {
       console.error('Error creating item:', error);
       toast({
         title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to create item',
+        description:
+          error instanceof Error ? error.message : 'Failed to create item',
         variant: 'destructive',
       });
     } finally {
@@ -116,7 +115,7 @@ export function CreateItemDialog({ initiativeId, onItemCreated }: CreateItemDial
         <DialogHeader>
           <DialogTitle>Create New Item</DialogTitle>
           <DialogDescription>
-            Add a new item to this initiative. Title supports Markdown formatting.
+            Add a new item to this topic. Title supports Markdown formatting.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -137,7 +136,9 @@ export function CreateItemDialog({ initiativeId, onItemCreated }: CreateItemDial
                   <FormDescription>
                     Preview:
                     <div className="mt-2 p-2 border rounded-md prose prose-sm">
-                      <ReactMarkdown>{titleValue || 'No content'}</ReactMarkdown>
+                      <ReactMarkdown>
+                        {titleValue || 'No content'}
+                      </ReactMarkdown>
                     </div>
                   </FormDescription>
                   <FormMessage />

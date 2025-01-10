@@ -49,13 +49,9 @@ interface EditTopicDialogProps {
     description: string;
     status: 'active' | 'completed' | 'cancelled';
   };
-  onTopicUpdated: () => void;
 }
 
-export function EditTopicDialog({
-  topic,
-  onTopicUpdated = () => {},
-}: EditTopicDialogProps) {
+export function EditTopicDialog({ topic }: EditTopicDialogProps) {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
@@ -102,7 +98,6 @@ export function EditTopicDialog({
       });
 
       setOpen(false);
-      onTopicUpdated();
     } catch (error) {
       console.error('Error updating topic:', error);
       toast({
