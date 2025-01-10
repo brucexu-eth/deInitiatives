@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -72,7 +74,8 @@ export function TopicHeader({ topic }: Props) {
             <ReactMarkdown>{topic.title}</ReactMarkdown>
           </div>
           <div className="mt-1 text-sm text-gray-500">
-            Created by {topic.createdBy.slice(0, 6)}...{topic.createdBy.slice(-4)}
+            Created by {topic.createdBy.slice(0, 6)}...
+            {topic.createdBy.slice(-4)}
           </div>
         </div>
         <div className="flex items-center gap-2">

@@ -34,19 +34,19 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-interface EditInitiativeDialogProps {
-  initiative: {
+interface EditTopicDialogProps {
+  topic: {
     id: string;
     title: string;
     description: string;
   };
-  onInitiativeUpdated: () => void;
+  onTopicUpdated: () => void;
 }
 
-export function EditInitiativeDialog({
-  initiative,
-  onInitiativeUpdated,
-}: EditInitiativeDialogProps) {
+export function EditTopicDialog({
+  topic,
+  onTopicUpdated,
+}: EditTopicDialogProps) {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
@@ -55,8 +55,8 @@ export function EditInitiativeDialog({
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: initiative.title,
-      description: initiative.description,
+      title: topic.title,
+      description: topic.description,
     },
   });
 
@@ -72,32 +72,33 @@ export function EditInitiativeDialog({
 
     setIsSubmitting(true);
     try {
-      const response = await fetch(`/api/initiatives/${initiative.id}`, {
-        method: 'PUT',
+      const response = await fetch(`/api/topics/${topic.id}`, {
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(data),
       });
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to update initiative');
+        throw new Error(error.error || 'Failed to update topic');
       }
 
       toast({
         title: 'Success',
-        description: 'Initiative updated successfully',
+        description: 'Topic updated successfully',
       });
 
       setOpen(false);
-      onInitiativeUpdated();
+      onTopicUpdated();
     } catch (error) {
-      console.error('Error updating initiative:', error);
+      console.error('Error updating topic:', error);
       toast({
         title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to update initiative',
+        description:
+          error instanceof Error ? error.message : 'Failed to update topic',
         variant: 'destructive',
       });
     } finally {
@@ -114,9 +115,9 @@ export function EditInitiativeDialog({
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit Initiative</DialogTitle>
+          <DialogTitle>Edit Topic</DialogTitle>
           <DialogDescription>
-            Make changes to your initiative here. Click save when you&apos;re done.
+            Make changes to your topic here. Click save when you&apos;re done.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -128,7 +129,7 @@ export function EditInitiativeDialog({
                 <FormItem>
                   <FormLabel>Title</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter initiative title" {...field} />
+                    <Input placeholder="Enter topic title" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -142,7 +143,7 @@ export function EditInitiativeDialog({
                   <FormLabel>Description</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Enter initiative description"
+                      placeholder="Enter topic description"
                       className="h-32"
                       {...field}
                     />

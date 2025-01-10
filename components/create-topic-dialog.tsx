@@ -5,6 +5,8 @@ import { z } from 'zod';
 import { toast } from 'sonner';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
+
 import {
   Dialog,
   DialogContent,
@@ -39,13 +41,13 @@ export function CreateTopicDialog({ onTopicCreated }: Props) {
     resolver: zodResolver(formSchema),
   });
   const { toast } = useToast();
+  const { token } = useAuth();
 
   const onSubmit = async (data: FormData) => {
     try {
-      const auth_token = localStorage.getItem('auth_token');
       const headers: HeadersInit = {
         'Content-Type': 'application/json',
-        ...(auth_token && { Authorization: `Bearer ${auth_token}` }),
+        Authorization: `Bearer ${token}`,
       };
       const response = await fetch('/api/topics', {
         method: 'POST',
