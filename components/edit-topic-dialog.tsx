@@ -23,6 +23,13 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 import { Pencil } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -30,6 +37,7 @@ import { useAuth } from '@/hooks/useAuth';
 const formSchema = z.object({
   title: z.string().min(1, 'Title is required').max(100, 'Title is too long'),
   description: z.string().min(1, 'Description is required'),
+  status: z.enum(['active', 'completed', 'cancelled']),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -39,13 +47,14 @@ interface EditTopicDialogProps {
     id: string;
     title: string;
     description: string;
+    status: 'active' | 'completed' | 'cancelled';
   };
   onTopicUpdated: () => void;
 }
 
 export function EditTopicDialog({
   topic,
-  onTopicUpdated,
+  onTopicUpdated = () => {},
 }: EditTopicDialogProps) {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -57,6 +66,7 @@ export function EditTopicDialog({
     defaultValues: {
       title: topic.title,
       description: topic.description,
+      status: topic.status,
     },
   });
 
@@ -148,6 +158,31 @@ export function EditTopicDialog({
                       {...field}
                     />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Status</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a status" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="completed">Completed</SelectItem>
+                      <SelectItem value="cancelled">Cancelled</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
