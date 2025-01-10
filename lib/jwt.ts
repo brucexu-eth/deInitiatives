@@ -1,4 +1,3 @@
-import jwt from 'jsonwebtoken';
 import { SignJWT, jwtVerify } from 'jose';
 import { getEnvVar } from './env';
 
@@ -11,7 +10,10 @@ export interface JWTPayload {
   exp: number;
 }
 
-export async function createToken(address: string, nonce: string): Promise<string> {
+export async function createToken(
+  address: string,
+  nonce: string
+): Promise<string> {
   const iat = Math.floor(Date.now() / 1000);
   const exp = iat + 7 * 24 * 60 * 60; // 7 days
 

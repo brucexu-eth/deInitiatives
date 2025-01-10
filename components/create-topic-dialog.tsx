@@ -30,18 +30,26 @@ interface Props {
 
 export function CreateTopicDialog({ onTopicCreated }: Props) {
   const [open, setOpen] = useState(false);
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<FormData>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<FormData>({
     resolver: zodResolver(formSchema),
   });
   const { toast } = useToast();
 
   const onSubmit = async (data: FormData) => {
     try {
+      const auth_token = localStorage.getItem('auth_token');
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+        ...(auth_token && { Authorization: `Bearer ${auth_token}` }),
+      };
       const response = await fetch('/api/topics', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify(data),
       });
 
@@ -96,7 +104,9 @@ export function CreateTopicDialog({ onTopicCreated }: Props) {
               placeholder="Enter topic title"
             />
             {errors.title && (
-              <p className="text-sm text-red-500 mt-1">{errors.title.message}</p>
+              <p className="text-sm text-red-500 mt-1">
+                {errors.title.message}
+              </p>
             )}
           </div>
           <div>

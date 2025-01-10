@@ -69,10 +69,7 @@ export async function withTopicOwnerAuth(
     });
 
     if (!topic) {
-      return NextResponse.json(
-        { error: 'Topic not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Topic not found' }, { status: 404 });
     }
 
     // 检查是否是topic的创建者
