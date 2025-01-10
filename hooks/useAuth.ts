@@ -19,49 +19,44 @@ export function useAuth() {
 
   const login = useCallback(async () => {
     if (!address) return;
-
-    try {
-      setIsLoading(true);
-      // Get nonce
-      const nonceResponse = await fetch(`/api/auth/nonce?address=${address}`);
-      if (!nonceResponse.ok) {
-        throw new Error('Failed to get nonce');
-      }
-      const { nonce } = await nonceResponse.json();
-
-      // Create message to sign
-      const message = `Sign this message to prove you own this wallet.\nNonce: ${nonce}`;
-
-      // Get signature
-      const signature = await signMessageAsync({ message });
-
-      // Verify signature and get token
-      const verifyResponse = await fetch('/api/auth/verify', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          signature,
-          message,
-          address,
-        }),
-      });
-
-      if (!verifyResponse.ok) {
-        throw new Error('Failed to verify signature');
-      }
-
-      const { token: newToken } = await verifyResponse.json();
-      localStorage.setItem('auth_token', newToken);
-      setToken(newToken);
-    } catch (error) {
-      console.error('Login error:', error);
-      localStorage.removeItem('auth_token');
-      setToken(null);
-    } finally {
-      setIsLoading(false);
+    setIsLoading(true);
+    // Get nonce
+    const nonceResponse = await fetch(`/api/auth/nonce?address=${address}`);
+    if (!nonceResponse.ok) {
+      throw new Error(`Failed to get nonce: ${nonceResponse.statusText}`);
     }
+    const { nonce } = await nonceResponse.json();
+
+    // Create message to sign
+    const message = `Sign this message to prove you own this wallet.\nNonce: ${nonce}`;
+
+    // Get signature
+    const signature = await signMessageAsync({ message });
+
+    // Verify signature and get token
+    const verifyResponse = await fetch('/api/auth/verify', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        signature,
+        message,
+        address,
+      }),
+    });
+
+    if (!verifyResponse.ok) {
+      throw new Error(
+        `Failed to verify signature: ${verifyResponse.statusText}`
+      );
+    }
+
+    const { token: newToken } = await verifyResponse.json();
+    localStorage.setItem('auth_token', newToken);
+    setToken(newToken);
+
+    setIsLoading(false);
   }, [address, signMessageAsync]);
 
   const logout = useCallback(() => {

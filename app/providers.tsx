@@ -24,7 +24,7 @@ if (!projectId) {
 }
 
 const config = getDefaultConfig({
-  appName: 'deInitiatives',
+  appName: 'Consensus',
   projectId,
   chains: [mainnet, sepolia],
   ssr: true,
@@ -34,12 +34,26 @@ const queryClient = new QueryClient();
 
 function WalletAuthWrapper({ children }: { children: React.ReactNode }) {
   const { address, isConnected } = useAccount();
-  const { login, token } = useAuth();
+  const { login, token, logout } = useAuth();
+  const [prevAddress, setPrevAddress] = React.useState<string | undefined>(address);
 
-  // Only try to login when first connecting and there's no stored token
+  // 处理钱包切换
+  React.useEffect(() => {
+    if (address !== prevAddress) {
+      // 如果是切换钱包，先登出
+      if (prevAddress) {
+        logout();
+      }
+      setPrevAddress(address);
+    }
+  }, [address, prevAddress, logout]);
+
+  // 处理登录
   React.useEffect(() => {
     if (isConnected && address && !token) {
-      login().catch(console.error);
+      login().catch((error) => {
+        console.error('Login failed:', error);
+      });
     }
   }, [isConnected, address, token, login]);
 

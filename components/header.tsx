@@ -9,7 +9,7 @@ export function Header() {
       <div className="container max-w-4xl mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
           <Link href="/" className="text-xl font-bold">
-            DeInitiatives
+            Consensus
           </Link>
           <ConnectButton />
         </div>

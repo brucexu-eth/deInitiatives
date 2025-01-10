@@ -1,24 +1,24 @@
-# deInitiatives
+# Consensus
 
-**deInitiatives** is a lightweight, Web3-enabled application designed to help communities and DAOs prioritize and manage their initiatives through collaborative voting.
-
----
-
-## What is deInitiatives?
-
-deInitiatives empowers communities to decide what to focus on next. It allows users to create **Initiatives**—community-focused themes or projects—and contribute tasks. Members vote on these tasks, helping the group prioritize what matters most. The app is simple, flexible, and built for rapid deployment, making it ideal for research groups, DAOs, and any collective seeking alignment on priorities.
+**Consensus** is a lightweight, Web3-enabled application designed to help communities and DAOs prioritize and manage their initiatives through collaborative voting.
 
 ---
 
-## Why deInitiatives?
+## What is Consensus?
 
-In decentralized communities, decision-making often feels scattered, with members unsure of where to focus their efforts. deInitiatives solves this by providing a transparent, democratic voting system where:
+Consensus empowers communities to decide what to focus on next. It allows users to create **Initiatives**—community-focused themes or projects—and contribute tasks. Members vote on these tasks, helping the group prioritize what matters most. The app is simple, flexible, and built for rapid deployment, making it ideal for research groups, DAOs, and any collective seeking alignment on priorities.
+
+---
+
+## Why Consensus?
+
+In decentralized communities, decision-making often feels scattered, with members unsure of where to focus their efforts. Consensus solves this by providing a transparent, democratic voting system where:
 
 - Everyone can contribute ideas and vote on what’s important.
 - Admins can manage priorities and archive completed tasks.
 - Communities can achieve alignment and focus effectively.
 
-By leveraging Web3 technology, deInitiatives also ensures that the process is secure, transparent, and future-proof, with planned support for on-chain functionality.
+By leveraging Web3 technology, Consensus also ensures that the process is secure, transparent, and future-proof, with planned support for on-chain functionality.
 
 ---
 
@@ -48,7 +48,7 @@ This project is designed to be modular and easy to extend. To run the applicatio
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/brucexu-eth/deInitiatives.git
+   git clone https://github.com/brucexu-eth/consensus.git
    ```
 
 2. Install dependencies:
@@ -89,4 +89,4 @@ This project is licensed under the MIT License. See the `LICENSE` file for detai
 
 ---
 
-Happy building with **deInitiatives**! 🎉
+Happy building with **Consensus**! 🎉

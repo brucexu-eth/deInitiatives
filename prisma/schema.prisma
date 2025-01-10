@@ -10,7 +10,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Initiative {
+model Topic {
   id          String   @id @default(cuid())
   title       String
   description String
@@ -18,24 +18,24 @@ model Initiative {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   createdBy   String // wallet address of creator
-  items       Item[] // List of items/proposals in this initiative
+  items       Item[] // List of items/proposals in this topic
 }
 
 model Item {
-  id           String     @id @default(cuid())
-  title        String
-  description  String?
-  status       String     @default("active")
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  createdBy    String
-  initiativeId String
-  initiative   Initiative @relation(fields: [initiativeId], references: [id], onDelete: Cascade)
-  votes        Vote[]
-  upVotes      Int        @default(0)
-  downVotes    Int        @default(0)
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  status      String   @default("active")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String
+  topicId     String
+  topic       Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  votes       Vote[]
+  upVotes     Int      @default(0)
+  downVotes   Int      @default(0)
 
-  @@index([initiativeId])
+  @@index([topicId])
 }
 
 model Vote {

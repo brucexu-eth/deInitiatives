@@ -8,8 +8,8 @@ import { Header } from '@/components/header';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'DeInitiatives',
-  description: 'Community-driven initiative voting platform',
+  title: 'Consensus',
+  description: 'Community-driven consensus voting platform',
 };
 
 export default function RootLayout({
@@ -22,9 +22,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <Providers>
           <Header />
-          <main className="py-8 px-4">
-            {children}
-          </main>
+          <main className="py-8 px-4">{children}</main>
           <Toaster />
         </Providers>
       </body>

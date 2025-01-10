@@ -1,26 +1,31 @@
-export interface Initiative {
+export interface Topic {
   id: string;
   title: string;
   description: string;
-  created_at: string;
-  created_by: string;
-  is_archived: boolean;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+  createdBy: string;
 }
 
-export interface Task {
+export interface Item {
   id: string;
-  initiative_id: string;
+  topic_id: string;
   title: string;
   description: string;
-  vote_count: number;
-  created_at: string;
-  created_by: string;
-  is_archived: boolean;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+  createdBy: string;
+  upVotes: number;
+  downVotes: number;
+  userVote?: string | null;
 }
 
 export interface Vote {
   id: string;
-  task_id: string;
-  user_address: string;
-  created_at: string;
+  itemId: string;
+  voter: string;
+  voteType: string;
+  createdAt: Date;
 }

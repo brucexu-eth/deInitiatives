@@ -56,29 +56,29 @@ export async function withOptionalAuth(
   }
 }
 
-// Initiative所有者认证中间件
-export async function withInitiativeOwnerAuth(
-  req: NextRequest,
-  initiativeId: string,
+// Topic所有者认证中间件
+export async function withTopicOwnerAuth(
+  request: NextRequest,
+  topicId: string,
   handler: AuthHandler
 ): Promise<NextResponse> {
-  return withAuth(req, async (req, address) => {
-    // 查找initiative
-    const initiative = await prisma.initiative.findUnique({
-      where: { id: initiativeId },
+  return withAuth(request, async (req, address) => {
+    // 查找topic
+    const topic = await prisma.topic.findUnique({
+      where: { id: topicId },
     });
 
-    if (!initiative) {
+    if (!topic) {
       return NextResponse.json(
-        { error: 'Initiative not found' },
+        { error: 'Topic not found' },
         { status: 404 }
       );
     }
 
-    // 检查是否是initiative的创建者
-    if (initiative.createdBy.toLowerCase() !== address.toLowerCase()) {
+    // 检查是否是topic的创建者
+    if (topic.createdBy.toLowerCase() !== address.toLowerCase()) {
       return NextResponse.json(
-        { error: 'Admin access required' },
+        { error: 'Not authorized to modify this topic' },
         { status: 403 }
       );
     }
@@ -87,35 +87,35 @@ export async function withInitiativeOwnerAuth(
   });
 }
 
-// Item状态编辑认证中间件
+// Item状态修改认证中间件
 export async function withItemStatusAuth(
-  req: NextRequest,
-  initiativeId: string,
+  request: NextRequest,
+  topicId: string,
   itemId: string,
   handler: AuthHandler
 ): Promise<NextResponse> {
-  return withAuth(req, async (req, address) => {
-    // 查找initiative和item
-    const [initiative, item] = await Promise.all([
-      prisma.initiative.findUnique({
-        where: { id: initiativeId },
+  return withAuth(request, async (req, address) => {
+    // 查找topic和item
+    const [topic, item] = await Promise.all([
+      prisma.topic.findUnique({
+        where: { id: topicId },
       }),
       prisma.item.findUnique({
         where: { id: itemId },
       }),
     ]);
 
-    if (!initiative || !item) {
+    if (!topic || !item) {
       return NextResponse.json(
-        { error: 'Initiative or item not found' },
+        { error: 'Topic or item not found' },
         { status: 404 }
       );
     }
 
     // 检查权限
-    if (!canEditItemStatus(address, initiative.createdBy, item.createdBy)) {
+    if (!canEditItemStatus(address, topic.createdBy, item.createdBy)) {
       return NextResponse.json(
-        { error: 'Admin access required' },
+        { error: 'Not authorized to modify this item' },
         { status: 403 }
       );
     }
