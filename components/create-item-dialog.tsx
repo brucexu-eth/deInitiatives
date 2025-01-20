@@ -112,12 +112,12 @@ export function CreateItemDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" />
+        <Button variant="outline" size="sm">
+          <PlusCircle className="h-4 w-4 mr-2" />
           New Item
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create New Item</DialogTitle>
           <DialogDescription>
@@ -144,7 +144,7 @@ export function CreateItemDialog({
                     </FormControl>
                     <FormDescription>
                       Preview:
-                      <div className="mt-2 p-2 border rounded-md prose prose-sm">
+                      <div className="mt-2 p-2 border rounded-md prose prose-sm max-h-40 overflow-y-auto">
                         <ReactMarkdown>
                           {titleValue || 'No content'}
                         </ReactMarkdown>
@@ -172,7 +172,7 @@ export function CreateItemDialog({
                     </FormControl>
                     <FormDescription>
                       Preview:
-                      <div className="mt-2 p-2 border rounded-md prose prose-sm">
+                      <div className="mt-2 p-2 border rounded-md prose prose-sm max-h-40 overflow-y-auto">
                         <ReactMarkdown>
                           {descValue || 'No content'}
                         </ReactMarkdown>
