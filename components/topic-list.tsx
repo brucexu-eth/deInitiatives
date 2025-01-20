@@ -69,7 +69,7 @@ export function TopicList() {
             <p className="mt-2 text-sm text-gray-500">
               Get started by creating a new topic for your community.
             </p>
-            <div className="mt-6">
+            <div className="mt-6 flex justify-center">
               <RequireWallet>
                 <CreateTopicDialog onTopicCreated={fetchTopics} />
               </RequireWallet>
