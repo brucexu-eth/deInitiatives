@@ -29,6 +29,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import { PlusCircle } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({
   title: z.string().min(1, 'Title is required').max(100, 'Title is too long'),
@@ -42,12 +43,16 @@ interface CreateItemDialogProps {
   onItemCreated?: () => void;
 }
 
-export function CreateItemDialog({ topicId, onItemCreated }: CreateItemDialogProps) {
+export function CreateItemDialog({
+  topicId,
+  onItemCreated,
+}: CreateItemDialogProps) {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { address } = useAccount();
   const { token } = useAuth();
   const { toast } = useToast();
+  const router = useRouter();
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -56,8 +61,6 @@ export function CreateItemDialog({ topicId, onItemCreated }: CreateItemDialogPro
       description: '',
     },
   });
-
-  const titleValue = form.watch('title');
 
   const onSubmit = async (data: FormData) => {
     if (!token) {
@@ -91,6 +94,7 @@ export function CreateItemDialog({ topicId, onItemCreated }: CreateItemDialogPro
 
       form.reset();
       setOpen(false);
+      router.refresh(); // 刷新页面数据
       onItemCreated?.(); // Call the callback if provided
     } catch (error) {
       console.error('Error creating item:', error);
@@ -117,52 +121,67 @@ export function CreateItemDialog({ topicId, onItemCreated }: CreateItemDialogPro
         <DialogHeader>
           <DialogTitle>Create New Item</DialogTitle>
           <DialogDescription>
-            Add a new item to this topic. Title supports Markdown formatting.
+            Add a new item to this topic. Title and description support Markdown
+            formatting.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
               name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Title</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Enter item title"
-                      className="h-20"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Preview:
-                    <div className="mt-2 p-2 border rounded-md prose prose-sm">
-                      <ReactMarkdown>
-                        {titleValue || 'No content'}
-                      </ReactMarkdown>
-                    </div>
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
+              render={({ field }) => {
+                const titleValue = field.value;
+                return (
+                  <FormItem>
+                    <FormLabel>Title *</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Enter item title"
+                        className="h-20"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Preview:
+                      <div className="mt-2 p-2 border rounded-md prose prose-sm">
+                        <ReactMarkdown>
+                          {titleValue || 'No content'}
+                        </ReactMarkdown>
+                      </div>
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
             />
             <FormField
               control={form.control}
               name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description (Optional)</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Enter item description"
-                      className="h-32"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              render={({ field }) => {
+                const descValue = field.value;
+                return (
+                  <FormItem>
+                    <FormLabel>Description (optional)</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Enter item description"
+                        className="h-32"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Preview:
+                      <div className="mt-2 p-2 border rounded-md prose prose-sm">
+                        <ReactMarkdown>
+                          {descValue || 'No content'}
+                        </ReactMarkdown>
+                      </div>
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
             />
             <div className="flex justify-end">
               <Button type="submit" disabled={isSubmitting}>
