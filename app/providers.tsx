@@ -41,9 +41,10 @@ function WalletAuthWrapper({ children }: { children: React.ReactNode }) {
 
   // 处理钱包切换
   React.useEffect(() => {
-    if (address !== prevAddress) {
-      // 如果是切换钱包，先登出
+    if (address !== prevAddress && address !== undefined) {
+      // 只有当新地址存在时才进行切换
       if (prevAddress) {
+        console.log('Logging out due to wallet change');
         logout();
       }
       setPrevAddress(address);
@@ -53,6 +54,7 @@ function WalletAuthWrapper({ children }: { children: React.ReactNode }) {
   // 处理登录
   React.useEffect(() => {
     if (isConnected && address && !token) {
+      console.log('Attempting to log in with address:', address);
       login().catch((error) => {
         console.error('Login failed:', error);
       });
