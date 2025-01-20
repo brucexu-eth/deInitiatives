@@ -33,6 +33,7 @@ import {
 import { useToast } from '@/components/ui/use-toast';
 import { Pencil } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({
   title: z.string().min(1, 'Title is required').max(100, 'Title is too long'),
@@ -56,6 +57,7 @@ export function EditTopicDialog({ topic }: EditTopicDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const { token } = useAuth();
+  const router = useRouter();
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -98,6 +100,7 @@ export function EditTopicDialog({ topic }: EditTopicDialogProps) {
       });
 
       setOpen(false);
+      router.refresh(); // 刷新页面数据
     } catch (error) {
       console.error('Error updating topic:', error);
       toast({
