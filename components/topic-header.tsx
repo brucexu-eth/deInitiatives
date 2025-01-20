@@ -77,12 +77,26 @@ export function TopicHeader({ topic }: Props) {
           <ChevronLeftIcon className="h-5 w-5" />
         </Link>
         <div className="flex-1">
-          <div className="prose prose-sm max-w-none">
-            <ReactMarkdown>{topic.title}</ReactMarkdown>
+          <div className="flex items-center gap-4 prose prose-md max-w-none">
+            <span
+              className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
+                topic.status === 'active'
+                  ? 'bg-green-100 text-green-800'
+                  : topic.status === 'completed'
+                  ? 'bg-blue-100 text-blue-800'
+                  : 'bg-gray-100 text-gray-800'
+              }`}
+            >
+              {topic.status.charAt(0).toUpperCase() + topic.status.slice(1)}
+            </span>
+            <div className="w-px h-4 bg-gray-300"></div>
+            <ReactMarkdown className="font-bold">{topic.title}</ReactMarkdown>
           </div>
-          <div className="mt-1 text-sm text-gray-500">
-            Created by {topic.createdBy.slice(0, 6)}...
-            {topic.createdBy.slice(-4)}
+          <div className="mt-2 flex items-center gap-2 text-sm text-gray-500">
+            <span>
+              Created by {topic.createdBy.slice(0, 6)}...
+              {topic.createdBy.slice(-4)}
+            </span>
           </div>
         </div>
         <div className="flex items-center gap-2">
